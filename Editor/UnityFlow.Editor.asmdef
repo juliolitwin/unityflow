@@ -1,0 +1,25 @@
+{
+    "name": "UnityFlow.Editor",
+    "rootNamespace": "UnityFlow.Editor",
+    "references": [
+        "UnityFlow",
+        "Unity.Pipeline",
+        "Unity.Pipeline.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "YamlDotNet.dll",
+        "Microsoft.CodeAnalysis.dll",
+        "Microsoft.CodeAnalysis.CSharp.dll",
+        "System.Collections.Immutable.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,16 @@
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Ll]ogs/
+*.csproj
+*.sln
+*.user
+
+# UnityFlow run artifacts
+.unityflow/
+
+# Node
+node_modules/
+npm-debug.log*

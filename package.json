@@ -1,0 +1,30 @@
+{
+  "name": "com.litwin.unityflow",
+  "displayName": "UnityFlow",
+  "version": "0.1.0",
+  "unity": "6000.0",
+  "description": "YAML-driven UI and gameplay test runner for the Unity Editor. Write a .flow.yaml, run one command, and the Editor drives your game and reports structured pass/fail. Designed so both humans and AI agents can author tests without writing C#.",
+  "keywords": [
+    "testing",
+    "automation",
+    "ui",
+    "e2e",
+    "agent",
+    "yaml"
+  ],
+  "author": {
+    "name": "Julio Litwin"
+  },
+  "license": "LicenseRef-PolyForm-Perimeter-1.0.0",
+  "licensesUrl": "https://polyformproject.org/licenses/perimeter/1.0.0",
+  "dependencies": {
+    "com.unity.pipeline": "0.3.1-exp.1"
+  },
+  "samples": [
+    {
+      "displayName": "Example Flows",
+      "description": "Runnable .flow.yaml examples covering tapOn, waitFor, assertions and screenshots.",
+      "path": "Samples~/ExampleFlows"
+    }
+  ]
+}

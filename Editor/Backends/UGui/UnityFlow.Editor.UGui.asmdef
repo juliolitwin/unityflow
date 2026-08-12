@@ -1,0 +1,29 @@
+{
+    "name": "UnityFlow.Editor.UGui",
+    "rootNamespace": "UnityFlow.Editor.Backends.UGui",
+    "references": [
+        "UnityFlow",
+        "UnityFlow.Editor",
+        "Unity.Pipeline",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITYFLOW_UGUI"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.ugui",
+            "expression": "1.0.0",
+            "define": "UNITYFLOW_UGUI"
+        }
+    ],
+    "noEngineReferences": false
+}

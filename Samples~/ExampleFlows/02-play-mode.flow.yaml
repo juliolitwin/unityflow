@@ -1,0 +1,23 @@
+# The same flow, but it provisions its own play mode.
+#
+# Entering play mode reloads the domain, which destroys the runner, the HTTP server and the
+# request that started the run. So this flow MUST be launched with 'unityflow run ... --start':
+# the runner keeps its state in SessionState and rebuilds itself on the far side of the reload.
+# Plain 'unityflow run' refuses this flow up front and names the command to use.
+
+name: play-mode
+requires: { input: system }
+
+before:
+  # Relative to the project root. Without a scene, play mode starts on whatever is open.
+  - enterPlayMode: Assets/Scenes/Sample.unity
+
+steps:
+  - waitFor:       { name: OpenButton, timeout: 60s }
+  - tapOn:         { text: Open }
+  - assertVisible: { name: SettingsPanel, timeout: 10s }
+  - screenshot:    01-panel-open
+
+after:
+  # 'after' runs even when the body failed, so the editor is never left in play mode.
+  - exitPlayMode

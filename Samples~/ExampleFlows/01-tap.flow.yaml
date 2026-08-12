@@ -1,0 +1,21 @@
+# The smallest useful flow: find a button, tap it, prove the panel it opens is on screen.
+# Assumes the editor is ALREADY in play mode. See 02-play-mode for the flow that gets there itself.
+
+name: tap
+requires: { input: system }
+
+steps:
+  # No 'wait: 2s' anywhere on purpose. Every verb re-checks on each pumped frame until its
+  # timeout, so load times and fade-ins are absorbed without anyone guessing a duration.
+  - waitFor:          { name: OpenButton, timeout: 30s }
+
+  # A negative assertion holds for a window (500ms by default) rather than returning on the
+  # first agreeing frame, or a panel appearing 300ms later would still show green.
+  - assertNotVisible: { name: SettingsPanel }
+
+  # Selected by its visible label. A real pointer lands on it and the live EventSystem raycast
+  # confirms the hit, so a modal covering the button fails this step instead of passing it.
+  - tapOn:            { text: Open }
+
+  - assertVisible:    { name: SettingsPanel, timeout: 10s }
+  - screenshot:       01-panel-open

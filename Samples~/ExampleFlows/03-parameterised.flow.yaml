@@ -1,0 +1,37 @@
+# Parameters, keyboard navigation, and a game-state assertion.
+#
+#   unityflow run Flows/03-parameterised.flow.yaml --start
+#   unityflow run Flows/03-parameterised.flow.yaml --start --env panel=OtherPanel
+#
+# '${name}' is substituted at PARSE time, so a misspelled variable fails in milliseconds with a
+# file:line:column and the list of names that ARE defined. It never resolves to an empty string.
+
+name: parameterised
+requires: { input: system }
+
+env:
+  scene: Assets/Scenes/Sample.unity
+  panel: SettingsPanel
+
+before:
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor: { name: OpenButton, timeout: 60s }
+
+  # Reaches the button the way a player without a mouse has to: real arrow keys through uGUI's
+  # own navigation graph, one press per frame. It never calls SetSelectedGameObject to get
+  # closer, so an element no keyboard can reach fails here as the accessibility bug it is.
+  - navigateTo: { name: OpenButton }
+  - submit:     { name: OpenButton }
+
+  - assertVisible: { name: "${panel}", timeout: 10s }
+
+  # A game-state assertion reads any field or property by name, public or not. Run
+  # 'unityflow probe --find SettingsPanel' to see every member and its current value.
+  - assert: { find: "${panel}", component: Canvas, field: enabled, is: true }
+
+  - screenshot: 01-panel-open
+
+after:
+  - exitPlayMode

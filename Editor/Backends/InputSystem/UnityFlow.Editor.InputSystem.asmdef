@@ -1,0 +1,29 @@
+{
+    "name": "UnityFlow.Editor.InputSystem",
+    "rootNamespace": "UnityFlow.Editor.Backends.InputInjection",
+    "references": [
+        "UnityFlow",
+        "UnityFlow.Editor",
+        "Unity.InputSystem",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITYFLOW_INPUTSYSTEM"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.inputsystem",
+            "expression": "1.7.0",
+            "define": "UNITYFLOW_INPUTSYSTEM"
+        }
+    ],
+    "noEngineReferences": false
+}
