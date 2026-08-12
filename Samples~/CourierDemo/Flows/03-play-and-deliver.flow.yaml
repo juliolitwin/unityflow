@@ -1,0 +1,49 @@
+# 03 - THE GAME.  enterPlayMode, a project [FlowCommand], held keys, waitUntil on component fields.
+#
+# The courier walks NORTH out of the start mark: parcel A, then parcel B, then the depot. Movement
+# runs in FixedUpdate through Rigidbody.MovePosition, so 'duration' on a held key buys a DISTANCE
+# rather than a frame-rate lottery - which is what makes this reproducible on a slow editor.
+
+name: courier-play-and-deliver
+requires: { input: system }
+
+env:
+  scene: "Assets/Samples/UnityFlow/0.1.0/Courier Demo/Courier.unity"
+  courier: Ines
+
+before:
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor:   { name: MenuPanel, timeout: 60s }
+  - inputText: { name: CourierNameField, text: "${courier}" }
+  - tapOn:     { testId: courier.menu.play }
+  - waitFor:   { name: HudPanel, timeout: 10s }
+
+  # The sample's one [FlowCommand]: an INSTANCE method on GameClock, so the flow never names an
+  # object - the runner finds the single GameClock in the scene. 'unity command flow.commands'
+  # lists it beside the built-in verbs.
+  - setTimer:  30
+
+  - assert:    { component: ParcelField, field: available, eq: 3 }
+  - assert:    { component: CourierInventory, field: count, eq: 0 }
+
+  # 2.4s of held W is 14.4 metres at 6 m/s: past both centre-lane parcels and into the depot. The
+  # courier is clamped inside the depot's far edge, so even a long hold ends somewhere assertable.
+  - press:     { key: w, duration: 2.4s }
+
+  # waitUntil is the same query as assert, used to WAIT instead of to demand - which is why this
+  # file contains no guessed pause between walking and scoring.
+  - waitUntil: { component: CourierInventory, field: count, eq: 0, timeout: 10s }
+  - assert:    { component: ScoreKeeper, field: delivered, eq: 2 }
+
+  # 120 + 80, doubled by the Normal difficulty multiplier the menu defaulted to.
+  - assert:    { component: ScoreKeeper, field: score, eq: 400 }
+  - assert:    { find: Courier, component: CourierPlayer, field: inZone, is: true }
+  - assert:    { component: GameClock, field: remaining, lt: 30 }
+
+  - assertText: { name: ScoreLabel, contains: "400" }
+  - screenshot: 03-delivered
+
+after:
+  - exitPlayMode

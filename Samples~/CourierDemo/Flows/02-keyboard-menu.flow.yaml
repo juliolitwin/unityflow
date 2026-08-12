@@ -1,0 +1,46 @@
+# 02 - THE SAME FORM WITH NO POINTER.  press, navigateTo, submit.
+#
+# navigateTo reaches the button the way a player without a mouse has to: real arrow keys through
+# uGUI's own navigation graph, one press per frame, re-reading the current selection after each.
+# It never calls SetSelectedGameObject to get closer - so a control no keyboard can reach fails
+# HERE, as the accessibility bug it is, instead of passing because a test cheated its way over.
+
+name: courier-keyboard-menu
+requires: { input: system }
+
+env:
+  scene: "Assets/Samples/UnityFlow/0.1.0/Courier Demo/Courier.unity"
+  courier: Bo
+
+before:
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor:    { name: MenuPanel, timeout: 60s }
+
+  # Typing is the one thing a raw key press cannot do, so it stays a verb of its own.
+  - inputText:  { name: CourierNameField, text: "${courier}" }
+
+  # A focused uGUI InputField swallows EVERY navigation event: InputField.OnUpdateSelected ends in
+  # an unconditional eventData.Use(), so the module never even reaches ProcessNavigation. A form
+  # whose first control is a text field is therefore a keyboard TRAP unless it handles Tab itself -
+  # which is a real accessibility bug, and exactly the kind navigateTo exists to surface.
+  - press:      { key: tab }
+
+  - navigateTo: { testId: courier.menu.play }
+
+  # submit first ASSERTS that the selector is the current selection, then sends Enter, so it can
+  # never submit to whatever the selection happened to drift to.
+  - submit:     { testId: courier.menu.play }
+
+  - waitFor:    { name: HudPanel, timeout: 10s }
+  - assert:     { component: CourierGame, field: phase, is: Playing }
+
+  # A real key on the injected keyboard, read by the game's own Update through
+  # Keyboard.current.escapeKey.wasPressedThisFrame.
+  - press:      { key: escape }
+  - assertVisible: { name: PausePanel, timeout: 5s }
+  - assert:     { component: GameClock, field: running, is: false }
+
+after:
+  - exitPlayMode

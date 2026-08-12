@@ -25,6 +25,11 @@
       "displayName": "Example Flows",
       "description": "Runnable .flow.yaml examples covering tapOn, waitFor, assertions and screenshots.",
       "path": "Samples~/ExampleFlows"
+    },
+    {
+      "displayName": "Courier Demo",
+      "description": "A small top-down game built from primitives, with six flows that drive it end to end: menu form, keyboard-only navigation, gameplay, drag-to-reorder, pause, and one deliberate failure.",
+      "path": "Samples~/CourierDemo"
     }
   ]
 }

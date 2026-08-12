@@ -520,7 +520,12 @@ namespace UnityFlow.Editor.Commands
         private static string ResolvePath(string file) =>
             Path.IsPathRooted(file) ? file : Path.GetFullPath(Path.Combine(RunPaths.ProjectRoot, file));
 
-        private static string NewRunId() =>
+        /// <summary>
+        /// A fresh run id. Internal because an in-process caller — the runner window — has to know
+        /// the id BEFORE the run starts, in order to tail its folder, and both commands only report
+        /// theirs back in a result that a started run does not produce until it ends.
+        /// </summary>
+        internal static string NewRunId() =>
             DateTime.UtcNow.ToString("yyyyMMdd-HHmmss", CultureInfo.InvariantCulture) + "-" +
             Guid.NewGuid().ToString("N").Substring(0, 6);
     }

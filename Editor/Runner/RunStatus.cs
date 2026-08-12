@@ -59,9 +59,12 @@ namespace UnityFlow.Editor.Runner
         /// <summary>Input driver in use, or the reason there is none.</summary>
         public string InputDriver;
 
-        public bool IsTerminal =>
-            State == RunState.Passed || State == RunState.Failed ||
-            State == RunState.Cancelled || State == RunState.Errored;
+        public bool IsTerminal => IsTerminalState(State);
+
+        /// <summary>Whether a run in this state will ever change again.</summary>
+        public static bool IsTerminalState(RunState state) =>
+            state == RunState.Passed || state == RunState.Failed ||
+            state == RunState.Cancelled || state == RunState.Errored;
 
         /// <summary>
         /// Write atomically: write a temp file then move it over the target. A poller that reads

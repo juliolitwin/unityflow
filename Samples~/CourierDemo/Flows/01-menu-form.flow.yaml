@@ -1,0 +1,45 @@
+# 01 - THE FORM.  inputText, tapOn, assertText, assertVisible.
+#
+# The rule under test is the one every real form has: PLAY IS DEAD UNTIL THE FIELD IS FILLED.
+# There is no 'wait: 2s' anywhere on purpose - every verb re-checks on each pumped frame until its
+# own timeout, so the scene load and the fade-in are absorbed without anyone guessing a duration.
+
+name: courier-menu-form
+requires: { input: system }
+
+env:
+  # Where Package Manager put the sample. Override it when the sample lives somewhere else:
+  #   unity command flow.start --file <this file> --env '["scene=Packages/com.litwin.unityflow/Samples~/CourierDemo/Courier.unity"]'
+  scene: "Assets/Samples/UnityFlow/0.1.0/Courier Demo/Courier.unity"
+  courier: Ada
+
+before:
+  # Entering play mode reloads the domain, so this flow must be launched with flow.start.
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor:       { name: MenuPanel, timeout: 60s }
+  - assertVisible: { testId: courier.menu.play }
+
+  # 'assert' reads the GAME rather than the screen. Button.interactable IS the gate, and a check
+  # that only looked at pixels could not tell a dead button from a merely dim one.
+  - assert:        { find: PlayButton, component: Button, field: interactable, is: false }
+  - assertText:    { name: MenuSummary, contains: "no courier" }
+
+  # uGUI input fields drain the IMGUI event queue, which no injected device feeds; inputText goes
+  # in through the control's own ProcessEvent and fires its real onValueChanged.
+  - inputText:     { name: CourierNameField, text: "${courier}" }
+
+  - assert:        { find: PlayButton, component: Button, field: interactable, is: true }
+  - assertText:    { name: MenuSummary, contains: "${courier}" }
+
+  # A real pointer lands on the toggle and the live EventSystem raycast confirms the hit, so the
+  # summary line changing is proof the click reached the game's own handler and not a shortcut.
+  - tapOn:         { name: SoundToggle }
+  - assertText:    { name: MenuSummary, contains: "sound off" }
+
+  - screenshot:    01-menu-filled
+
+after:
+  # 'after' runs even when the body failed, so the editor is never left in play mode.
+  - exitPlayMode

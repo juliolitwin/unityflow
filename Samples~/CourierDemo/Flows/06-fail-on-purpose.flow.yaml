@@ -1,0 +1,31 @@
+# 06 - WHAT A FAILURE LOOKS LIKE.  This flow is MEANT to fail; that is its entire job.
+#
+# It types nothing and then claims the Play button is live. Run it to see what UnityFlow reports
+# when an expectation is wrong: the object it actually read, the value it found, the value that was
+# expected, the file:line the step was written on, plus the UI tree and a screenshot at the moment
+# of failure. Everything after the failing step is skipped; 'after' still runs.
+#
+# Exit code 1, and the run's status.json says which step failed and why.
+
+name: courier-fail-on-purpose
+requires: { input: system }
+
+env:
+  scene: "Assets/Samples/UnityFlow/0.1.0/Courier Demo/Courier.unity"
+
+before:
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor:    { name: MenuPanel, timeout: 60s }
+  - assertText: { name: MenuSummary, contains: "no courier" }
+
+  # WRONG ON PURPOSE. Play is disabled until the courier has a name, and nothing above typed one.
+  # The timeout is short because this assertion is never going to become true and waiting the
+  # default out would only make the demo slow.
+  - assert:     { find: PlayButton, component: Button, field: interactable, is: true, timeout: 3s }
+
+  - screenshot: never-reached
+
+after:
+  - exitPlayMode

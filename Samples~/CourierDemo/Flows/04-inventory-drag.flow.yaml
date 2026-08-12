@@ -1,0 +1,53 @@
+# 04 - DRAG TO REORDER, AND AN ASSERTION THAT SURVIVES IT.
+#
+# 'drag' is not a press and a release somewhere else - that is a click. It moves to the source,
+# presses, holds COMPLETELY STILL for holdFor, confirms with the UI system that a drag actually
+# began, travels across real frames, and only then releases. The intermediate moves ARE the verb:
+# without motion under a held button uGUI raises no IBeginDragHandler and no IDropHandler at all.
+#
+# holdFor defaults to 600ms and is what arms a hold-to-pick-up UI. This inventory has no arming
+# gesture, so the default is simply time the pointer spends not moving; it is left alone here
+# rather than tuned down, because a flow that shortens it is a flow that stops proving the hold.
+
+name: courier-inventory-drag
+requires: { input: system }
+
+env:
+  scene: "Assets/Samples/UnityFlow/0.1.0/Courier Demo/Courier.unity"
+  courier: Nikko
+
+before:
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor:   { name: MenuPanel, timeout: 60s }
+  - inputText: { name: CourierNameField, text: "${courier}" }
+  - tapOn:     { testId: courier.menu.play }
+  - waitFor:   { name: HudPanel, timeout: 10s }
+
+  # 1.4s of held W is 8.4 metres: past both centre-lane parcels, short of the depot, so the courier
+  # is still carrying them when the panel opens.
+  - press:     { key: w, duration: 1.4s }
+  - waitUntil: { component: CourierInventory, field: count, eq: 2, timeout: 10s }
+
+  - press:     { key: tab }
+  - waitFor:   { testId: courier.slot.0, timeout: 5s }
+
+  # Both slots are identical frames whose only distinguishing text is the cargo they hold, so they
+  # carry a FlowTestId. Everything else in this sample is found by its name.
+  - assert:     { component: CourierInventory, field: firstLabel, eq: A }
+  - assertText: { name: ChipLabel, within: { testId: courier.slot.0 }, equals: A }
+  - assertText: { name: ChipLabel, within: { testId: courier.slot.1 }, equals: B }
+
+  - drag: { from: { testId: courier.slot.0 }, to: { testId: courier.slot.1 } }
+
+  # The reorder is MODEL state, not the position a chip happened to be left in. That is why these
+  # still mean something after the chip has snapped home and the panel has redrawn from scratch.
+  - assert:     { component: CourierInventory, field: firstLabel, eq: B, timeout: 5s }
+  - assertText: { name: ChipLabel, within: { testId: courier.slot.0 }, equals: B }
+  - assertText: { name: ChipLabel, within: { testId: courier.slot.1 }, equals: A }
+
+  - screenshot: 04-reordered
+
+after:
+  - exitPlayMode

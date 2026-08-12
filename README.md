@@ -1,5 +1,10 @@
 # UnityFlow
 
+![The UnityFlow runner window driving the Courier sample beside the Game view](Documentation~/unityflow.gif)
+
+*Two real runs of the Courier sample: `03-play-and-deliver` walks the courier to the depot and
+passes, then `06-fail-on-purpose` fails on the assertion it was written to break.*
+
 Write a `.flow.yaml`, run one command, and the Unity Editor drives your game and reports structured
 pass/fail — with the UI tree, the console output and a screenshot attached to every failure.
 

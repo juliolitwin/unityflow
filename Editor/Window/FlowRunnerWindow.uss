@@ -1,0 +1,525 @@
+/*
+ * UnityFlow runner window.
+ *
+ * Colours are declared TWICE and never sampled from the skin at run time: `.uf-dark` and
+ * `.uf-light` carry the whole palette, and the window puts one of the two classes on its root. The
+ * `--unity-colors-*` variables are used for the chrome that must match the editor exactly — window
+ * and toolbar backgrounds, borders, the selection highlight — because those are the surfaces the
+ * window is docked against, and anything hand-picked there reads as a seam.
+ */
+
+/* ---------------------------------------------------------------- palette */
+
+.uf-root {
+    flex-grow: 1;
+    color: var(--unity-colors-default-text);
+    background-color: var(--unity-colors-window-background);
+}
+
+.uf-root.uf-dark {
+    --uf-dim: rgb(146, 146, 146);
+    --uf-faint: rgb(150, 150, 150);
+    --uf-selected-text: var(--unity-colors-default-text);
+    --uf-action: rgb(122, 176, 232);
+    --uf-check: rgb(198, 150, 236);
+    --uf-lifecycle: rgb(140, 140, 140);
+    --uf-pass: rgb(124, 196, 124);
+    --uf-fail: rgb(230, 112, 106);
+    --uf-warn: rgb(224, 178, 76);
+    --uf-run: rgb(96, 162, 228);
+    --uf-card: rgb(60, 60, 60);
+    --uf-sunken: rgb(40, 40, 40);
+    --uf-chip: rgb(72, 72, 72);
+    --uf-hairline: rgb(48, 48, 48);
+    --uf-pill-text: rgb(26, 26, 26);
+    --uf-fail-wash: rgba(230, 112, 106, 0.10);
+}
+
+.uf-root.uf-light {
+    --uf-dim: rgb(88, 88, 88);
+    --uf-faint: rgb(96, 96, 96);
+    --uf-selected-text: rgb(246, 246, 246);
+    --uf-action: rgb(26, 100, 168);
+    --uf-check: rgb(126, 56, 168);
+    --uf-lifecycle: rgb(112, 112, 112);
+    --uf-pass: rgb(32, 122, 56);
+    --uf-fail: rgb(180, 40, 36);
+    --uf-warn: rgb(146, 102, 10);
+    --uf-run: rgb(30, 106, 186);
+    --uf-card: rgb(213, 213, 213);
+    --uf-sunken: rgb(228, 228, 228);
+    --uf-chip: rgb(199, 199, 199);
+    --uf-hairline: rgb(178, 178, 178);
+    --uf-pill-text: rgb(250, 250, 250);
+    --uf-fail-wash: rgba(180, 40, 36, 0.09);
+}
+
+/* ---------------------------------------------------------------- toolbar */
+
+.uf-toolbar-gap {
+    flex-grow: 1;
+}
+
+.uf-toolbar-search {
+    width: 190px;
+    margin-right: 2px;
+}
+
+/*
+ * Steps done over steps total, three pixels tall, directly under the toolbar. It is the one thing
+ * that has to be readable without reading: a glance at the seam says how far in the run is.
+ */
+.uf-rail {
+    height: 3px;
+    background-color: var(--uf-sunken);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.uf-rail__fill {
+    height: 3px;
+    width: 0;
+    background-color: var(--uf-run);
+}
+
+.uf-rail__fill--passed { background-color: var(--uf-pass); }
+.uf-rail__fill--failed { background-color: var(--uf-fail); }
+.uf-rail__fill--stopped { background-color: var(--uf-faint); }
+
+/* ---------------------------------------------------------------- flow picker */
+
+.uf-picker {
+    min-width: 190px;
+    background-color: var(--unity-colors-window-background);
+}
+
+.uf-folder__header {
+    flex-direction: row;
+    align-items: center;
+    height: 22px;
+    padding-left: 6px;
+    padding-right: 6px;
+    background-color: var(--uf-sunken);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--uf-hairline);
+}
+
+.uf-folder__twisty {
+    width: 12px;
+    color: var(--uf-dim);
+    font-size: 9px;
+    -unity-text-align: middle-center;
+}
+
+.uf-folder__name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: start;
+    -unity-font-style: bold;
+    font-size: 10px;
+    color: var(--uf-dim);
+}
+
+.uf-folder__count {
+    color: var(--uf-faint);
+    font-size: 10px;
+    margin-left: 6px;
+}
+
+.uf-flow {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 18px;
+    padding-right: 8px;
+    border-left-width: 2px;
+    border-left-color: rgba(0, 0, 0, 0);
+}
+
+.uf-flow:hover {
+    background-color: var(--unity-colors-highlight-background-inactive);
+}
+
+.uf-flow--selected {
+    background-color: var(--unity-colors-highlight-background);
+    border-left-color: var(--uf-action);
+}
+
+.uf-flow__name {
+    -unity-font-style: bold;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/*
+ * Elided from the LEFT. Every flow in a project shares a long prefix and differs only at the tail,
+ * so a path cut from the right shows the same characters on every row.
+ */
+.uf-flow__path {
+    font-size: 10px;
+    color: var(--uf-dim);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: start;
+    margin-top: 1px;
+}
+
+.uf-flow--selected .uf-flow__name,
+.uf-flow--selected .uf-flow__path {
+    color: var(--uf-selected-text);
+}
+
+.uf-flow__name--unnamed {
+    -unity-font-style: bold-and-italic;
+    color: var(--uf-dim);
+}
+
+/* ---------------------------------------------------------------- run header */
+
+.uf-report {
+    flex-grow: 1;
+    min-width: 260px;
+}
+
+.uf-header {
+    /* Fixed-height chrome. Without this the flex column charges the shrink to the header
+       and at a docked height (~420px) the status pill and title are sliced in half. */
+    flex-shrink: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: var(--uf-card);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+}
+
+.uf-header__top {
+    flex-direction: row;
+    align-items: center;
+}
+
+.uf-pill {
+    -unity-font-style: bold;
+    font-size: 10px;
+    color: var(--uf-pill-text);
+    background-color: var(--uf-faint);
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: 8px;
+    margin-right: 8px;
+}
+
+.uf-pill--running { background-color: var(--uf-run); }
+.uf-pill--passed { background-color: var(--uf-pass); }
+.uf-pill--failed { background-color: var(--uf-fail); }
+.uf-pill--stopped { background-color: var(--uf-faint); }
+
+.uf-header__flow {
+    -unity-font-style: bold;
+    flex-shrink: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.uf-header__elapsed {
+    margin-left: 8px;
+    color: var(--uf-dim);
+}
+
+.uf-chips {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 7px;
+}
+
+.uf-chip {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--uf-chip);
+    border-radius: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    margin-right: 4px;
+    margin-bottom: 3px;
+    max-width: 320px;
+}
+
+.uf-chip__key {
+    font-size: 9px;
+    color: var(--uf-dim);
+    margin-right: 4px;
+    -unity-text-align: middle-left;
+}
+
+.uf-chip__value {
+    font-size: 10px;
+    color: var(--unity-colors-default-text);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: middle;
+}
+
+.uf-note {
+    margin-top: 4px;
+    white-space: normal;
+    font-size: 10px;
+    color: var(--uf-dim);
+}
+
+.uf-note--warning {
+    color: var(--uf-warn);
+}
+
+/* ---------------------------------------------------------------- step list */
+
+.uf-steps {
+    flex-grow: 1;
+}
+
+/*
+ * before / steps / after. Which section a step is in is why it ran at all — 'after' executes even
+ * when the body failed — so a teardown step passing under a failed run needs no explaining.
+ */
+.uf-section {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: var(--uf-dim);
+    padding-left: 8px;
+    padding-top: 8px;
+    padding-bottom: 2px;
+}
+
+.uf-subflow {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 6px;
+    padding-left: 10px;
+    padding-right: 8px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    background-color: var(--uf-sunken);
+}
+
+.uf-subflow__label {
+    font-size: 9px;
+    color: var(--uf-faint);
+    margin-right: 6px;
+}
+
+.uf-subflow__file {
+    font-size: 10px;
+    color: var(--uf-dim);
+    flex-shrink: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: start;
+}
+
+.uf-step {
+    flex-direction: row;
+    align-items: center;
+    min-height: 21px;
+    padding-left: 6px;
+    padding-right: 10px;
+}
+
+.uf-step:hover {
+    background-color: var(--unity-colors-highlight-background-inactive);
+}
+
+.uf-step--nested {
+    padding-left: 22px;
+}
+
+.uf-step--failed {
+    background-color: var(--uf-fail-wash);
+}
+
+.uf-step__gutter {
+    width: 16px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    color: var(--uf-faint);
+}
+
+/*
+ * Wide enough for most of the vocabulary, so the arguments line up into a column instead of a
+ * ragged edge. A longer verb simply pushes its own argument out rather than widening every row.
+ */
+.uf-step__verb {
+    -unity-font-style: bold;
+    color: var(--uf-action);
+    min-width: 96px;
+    flex-shrink: 0;
+    margin-right: 6px;
+}
+
+.uf-step__verb--check { color: var(--uf-check); }
+.uf-step__verb--lifecycle { color: var(--uf-lifecycle); }
+
+/*
+ * The argument is the widest and least predictable part of the row, so it is the only thing that
+ * gives width back. Cut in the MIDDLE: a selector's head says what kind of thing it is and its
+ * tail says which one, and both are lost by a cut at either end.
+ */
+.uf-step__argument {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: middle;
+    color: var(--unity-colors-default-text);
+}
+
+.uf-step--pending .uf-step__verb { color: var(--uf-faint); }
+.uf-step--pending .uf-step__argument { color: var(--uf-faint); }
+
+.uf-step--running .uf-step__gutter { color: var(--uf-run); }
+.uf-step--passed .uf-step__gutter { color: var(--uf-pass); }
+.uf-step--failed .uf-step__gutter { color: var(--uf-fail); }
+.uf-step--stopped .uf-step__gutter { color: var(--uf-faint); }
+.uf-step--stopped .uf-step__argument { color: var(--uf-dim); }
+
+.uf-step__note {
+    font-size: 9px;
+    color: var(--uf-warn);
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+/* A fixed column so the digits line up down the list and nothing is ever cut mid-number. */
+.uf-step__duration {
+    width: 62px;
+    flex-shrink: 0;
+    margin-left: 8px;
+    -unity-text-align: middle-right;
+    font-size: 10px;
+    color: var(--uf-faint);
+}
+
+/* ---------------------------------------------------------------- failure */
+
+.uf-failure {
+    margin-left: 22px;
+    margin-right: 10px;
+    margin-bottom: 8px;
+    padding: 8px;
+    background-color: var(--uf-sunken);
+    border-left-width: 2px;
+    border-left-color: var(--uf-fail);
+}
+
+.uf-failure__summary {
+    color: var(--uf-fail);
+    white-space: normal;
+    -unity-font-style: bold;
+}
+
+.uf-failure__detail {
+    max-height: 180px;
+    margin-top: 6px;
+    background-color: var(--unity-colors-window-background);
+}
+
+.uf-failure__text {
+    white-space: pre;
+    font-size: 10px;
+    color: var(--uf-dim);
+    padding: 6px;
+}
+
+.uf-failure__foldout {
+    margin-top: 6px;
+}
+
+.uf-failure__shot {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-top: 8px;
+}
+
+.uf-failure__thumb {
+    width: 170px;
+    height: 100px;
+    margin-right: 8px;
+    border-width: 1px;
+    border-color: var(--uf-hairline);
+}
+
+.uf-failure__path {
+    flex-shrink: 1;
+    font-size: 10px;
+    color: var(--uf-run);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: start;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 2px;
+    -unity-text-align: middle-left;
+}
+
+/* ---------------------------------------------------------------- empty state */
+
+.uf-empty {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.uf-empty__title {
+    color: var(--uf-dim);
+    -unity-font-style: bold;
+}
+
+.uf-empty__path {
+    color: var(--uf-faint);
+    font-size: 10px;
+    margin-top: 3px;
+    max-width: 460px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: start;
+}
+
+.uf-empty__hint {
+    color: var(--uf-faint);
+    font-size: 10px;
+    margin-top: 4px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.uf-empty__error {
+    color: var(--uf-fail);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    max-width: 460px;
+}
+
+/* Below ~420px of step-list width the argument is the only element that yields, so the
+   fixed verb and duration columns are released. Set from code on GeometryChangedEvent —
+   USS has no media queries. */
+.uf-steps--narrow .uf-step__verb {
+    min-width: 0;
+}
+
+.uf-steps--narrow .uf-step__duration {
+    width: 44px;
+}

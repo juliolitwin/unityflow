@@ -338,6 +338,29 @@ namespace UnityFlow.Editor.Runner
                 SelectorMode.None, bareScalarArg: "name",
                 description: "Capture the screen to the run's artifacts folder.");
 
+            yield return new FlowVerbSpec("assertLog", new[]
+                {
+                    new FlowArgSpec("level", FlowArgKind.String, description: "Log, Warning, Error, Exception or Assert."),
+                    new FlowArgSpec("contains", FlowArgKind.String, description: "Substring of the message, case-insensitive."),
+                    new FlowArgSpec("matches", FlowArgKind.String, description: "Regular expression over the message."),
+                    new FlowArgSpec("since", FlowArgKind.String, description:
+                        "step, previous or run. Defaults to 'previous' — the action that logged usually ran in the step before."),
+                },
+                SelectorMode.None, bareScalarArg: "contains",
+                description: "Wait until a matching console message is logged. Retries until the timeout.");
+
+            yield return new FlowVerbSpec("assertNoLog", new[]
+                {
+                    new FlowArgSpec("level", FlowArgKind.String, description: "Log, Warning, Error, Exception or Assert."),
+                    new FlowArgSpec("contains", FlowArgKind.String, description: "Substring of the message, case-insensitive."),
+                    new FlowArgSpec("matches", FlowArgKind.String, description: "Regular expression over the message."),
+                    new FlowArgSpec("since", FlowArgKind.String, description: "step, previous or run."),
+                    new FlowArgSpec("stableFor", FlowArgKind.Duration, description:
+                        "How long the absence must hold. Defaults to 500ms; a negative assertion that passes instantly is vacuous."),
+                },
+                SelectorMode.None,
+                description: "Assert no matching console message appears, and keep checking for a window.");
+
             yield return new FlowVerbSpec("runScript", new[]
                 {
                     new FlowArgSpec("code", FlowArgKind.String, required: true, description:

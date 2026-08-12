@@ -114,6 +114,8 @@ namespace UnityFlow.Editor.Runner
                 case "assertText": return AssertText(ctx);
                 case "assert": return Assert(ctx);
                 case "waitUntil": return WaitUntil(ctx);
+                case "assertLog": return LogAssertions.AssertLog(ctx);
+                case "assertNoLog": return LogAssertions.AssertNoLog(ctx);
                 case "screenshot": return Screenshot(ctx);
                 case "runScript": return ScriptStep.Run(ctx);
                 case "wait": return Wait(ctx);

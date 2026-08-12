@@ -98,6 +98,15 @@ namespace UnityFlow.Editor.Runner
         /// <summary>Console cursor when the step began, so the report shows only this step's output.</summary>
         public int ConsoleCursorAtStart { get; internal set; }
 
+        /// <summary>
+        /// Console cursor as it stood when the PREVIOUS step began.
+        ///
+        /// This is what a log assertion usually means by "since": the action that should have
+        /// logged ran in the step before, so scoping to this step alone would look at an empty
+        /// window and report nothing found.
+        /// </summary>
+        public int ConsoleCursorBeforePreviousStep { get; internal set; }
+
         /// <summary>Set by a step to fail it. Leaving it null means the step passed.</summary>
         public StepFailure Failure { get; set; }
 

@@ -237,6 +237,7 @@ namespace UnityFlow.Editor.Runner
             m_Context.Section = section;
             m_Context.StepIndex = index;
             m_Context.Failure = null;
+            m_Context.ConsoleCursorBeforePreviousStep = m_Context.ConsoleCursorAtStart;
             m_Context.ConsoleCursorAtStart = m_Console.Cursor;
             m_Context.Deadline = Math.Min(stepStarted + stepTimeout, runDeadline);
 

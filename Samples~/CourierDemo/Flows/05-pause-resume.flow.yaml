@@ -1,0 +1,39 @@
+# 05 - A NEGATIVE ASSERTION THAT IS WORTH SOMETHING.  assertVisible, assertNotVisible, stableFor.
+#
+# assertNotVisible does not return on the first agreeing frame: it requires the node to STAY absent
+# for a window (500ms by default), because a panel that appears 300ms later would otherwise still
+# show green. The same idea is available to game-state queries as 'stableFor', and it is used below
+# to prove the clock is not merely stopped for one frame.
+
+name: courier-pause-resume
+requires: { input: system }
+
+env:
+  scene: "Assets/Samples/UnityFlow/0.1.0/Courier Demo/Courier.unity"
+  courier: Otto
+
+before:
+  - enterPlayMode: "${scene}"
+
+steps:
+  - waitFor:   { name: MenuPanel, timeout: 60s }
+  - inputText: { name: CourierNameField, text: "${courier}" }
+  - tapOn:     { testId: courier.menu.play }
+
+  - waitFor:          { name: HudPanel, timeout: 10s }
+  - assertNotVisible: { name: PausePanel, stableFor: 750ms }
+
+  - press:            { key: escape }
+  - assertVisible:    { name: PausePanel, timeout: 5s }
+
+  # The screen being up is half the claim; the clock having stopped is the other half, and a paused
+  # game that keeps counting down is exactly the bug a visual-only check would miss.
+  - assert:           { component: GameClock, field: running, is: false, stableFor: 1s }
+
+  - tapOn:            { name: ResumeButton }
+  - assertNotVisible: { name: PausePanel, stableFor: 750ms }
+  - assert:           { component: GameClock, field: running, is: true }
+  - assertVisible:    { name: TimeLabel }
+
+after:
+  - exitPlayMode
